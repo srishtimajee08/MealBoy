@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Create account' if registering else 'Welcome back' }}{% endblock %}
+{% block content %}
+  <div class="auth-layout">
+    <section class="auth-story">
+      <a class="brand" href="/login">
+      <img src="{{ url_for('static', filename='logo.svg') }}"
+           alt=""
+           width="40"
+           height="40">MealBoy.</a>
+      <div class="auth-story-copy">
+        <span class="eyebrow">A LITTLE CLARITY, EVERY MEAL</span>
+        <h1>
+          Get to know
+          <br>
+          your food.
+          <br>
+          <em>And yourself.</em>
+        </h1>
+        <p>From the first bite to the bigger picture. A thoughtful home for your meals, nutrition, and questions.</p>
+        <div class="story-pills"><span>Food recognition</span><span>Personal food diary</span><span>Private assistant</span></div>
+      </div>
+      <div class="auth-footer">BUILT AROUND YOU <span>01 / MEALBOY</span></div>
+    </section>
+    <section class="auth-form-wrap">
+      <div class="auth-form">
+        <span class="eyebrow">YOUR NEXT CHAPTER</span>
+        <h2>{{ 'Make room for better habits.' if registering else 'Good to see you again.' }}</h2>
+        <p class="muted">{{ 'Create your own private nutrition workspace.' if registering else 'Sign in and pick up where you left off.' }}</p>
+        {% if error %}<div class="alert error" role="alert">{{ error }}</div>{% endif %}
+        <form method="post" class="stack">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+          {% if registering %}<label>Your name
+            <input name="name"
+                   autocomplete="name"
+                   required
+                   minlength="2"
+                   maxlength="80"
+                   placeholder="How should we call you?"
+                   value="{{ request.form.get('name', '') }}">
+            </label>
+          {% endif %}
+          <label>
+            Email address
+            <input name="email"
+                   type="email"
+                   autocomplete="email"
+                   required
+                   maxlength="254"
+                   placeholder="you@example.com"
+                   value="{{ request.form.get('email', '') }}">
+          </label>
+          <label>
+            Password
+            <input name="password"
+                   type="password"
+                   autocomplete="{{ 'new-password' if registering else 'current-password' }}"
+                   required
+                   minlength="10"
+                   maxlength="128"
+                   placeholder="{{ 'At least 10 characters' if registering else 'Your password' }}">
+          </label>
+          <button class="button primary"
+                  type="submit">{{ 'Create your workspace' if registering else 'Sign in to MealBoy' }} <span>↗</span></button>
+        </form>
+        <p class="auth-switch">{{ 'Already have an account?' if registering else 'New around here?' }} <a href="{{ url_for('auth.login' if registering else 'auth.register') }}">{{ 'Sign in' if registering else 'Create an account' }}</a></p>
+        <p class="fine-print">Nutrition estimates use USDA reference foods and your entered portion weight. Actual recipes can differ.</p>
+      </div>
+    </section>
+  </div>
+{% endblock %}

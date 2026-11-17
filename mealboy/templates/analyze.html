@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Analyze food{% endblock %}
+{% block content %}
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">FROM PLATE TO PERSPECTIVE</span>
+      <h1>What's on your plate<span class="green">?</span></h1>
+      <p class="muted">Identify your food, confirm the portion, and make it part of your day.</p>
+    </div>
+    <span class="badge">01 / LOG A MEAL</span>
+  </header>
+  <div class="two-column">
+    <section class="card">
+      <div class="section-heading">
+        <h2><span class="step">1</span> Start with a photo</h2>
+      </div>
+      <form id="image-form" class="stack" enctype="multipart/form-data">
+        <label class="upload-zone" for="food-image">
+          <span class="upload-icon">⌁</span><strong>Give your meal a close-up</strong><span>Choose a clear photo of one food item</span><small>JPEG, PNG or WebP · up to 8 MB · 20 MP</small>
+          <input id="food-image"
+                 name="image"
+                 type="file"
+                 accept="image/jpeg,image/png,image/webp"
+                 required>
+        </label>
+        <img id="image-preview"
+             class="image-preview"
+             alt="Selected food preview"
+             hidden>
+        {% if not model_present %}<div class="notice">Image recognition needs a trained model. Manual logging is ready to use.</div>{% endif %}
+        <button class="button primary"
+                type="submit"
+                {% if not model_present %}disabled{% endif %}>Analyze photo <span>↗</span></button>
+      </form>
+      <div id="prediction-status"
+           class="status-text"
+           role="status"
+           aria-live="polite"></div>
+      <div id="predictions" class="prediction-list"></div>
+      <p class="fine-print">A classifier suggests a food label; it cannot measure portion weight or reliably identify every ingredient. Confirm the selection before saving.</p>
+    </section>
+    <section class="card">
+      <div class="section-heading">
+        <h2><span class="step">2</span> Make it your meal</h2>
+      </div>
+      <p class="muted">Confirm a suggestion or select your food manually.</p>
+      <form method="post"
+            action="{{ url_for('web.add_meal') }}"
+            class="stack"
+            id="meal-form">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        <label>
+          Food
+          <select id="food-select" name="food_key" required><option value="">Choose a food</option>{% for food in foods %}<option value="{{ food.key }}"
+        data-calories="{{ food.calories }}"
+        data-protein="{{ food.protein }}"
+        data-carbs="{{ food.carbs }}"
+        data-fat="{{ food.fat }}"
+        data-source="{{ food.source }}">{{ food.name }}</option>{% endfor %}</select></label>
+        <div class="form-grid">
+          <label>
+            Portion weight (g)
+            <input id="grams"
+                   name="grams"
+                   type="number"
+                   min="1"
+                   max="5000"
+                   step="0.1"
+                   value="100"
+                   required></label><label>Meal type
+              <select name="meal_type">{% for type in meal_types %}<option>{{ type }}</option>{% endfor %}</select></label></div>
+            <label>
+              Date eaten
+              <input name="eaten_on"
+                     type="date"
+                     value="{{ today }}"
+                     max="{{ today }}"
+                     min="1900-01-01"
+                     required>
+            </label>
+            <label>
+              Personal note <span class="optional">optional</span>
+              <textarea name="note"
+                        maxlength="500"
+                        rows="2"
+                        placeholder="Something you want to remember about this meal…"></textarea>
+            </label>
+            <div class="nutrition-preview" aria-live="polite"><span><strong id="preview-calories">—</strong><small>kcal</small></span><span><strong id="preview-protein">—</strong><small>protein (g)</small></span><span><strong id="preview-carbs">—</strong><small>carbs (g)</small></span><span><strong id="preview-fat">—</strong><small>fat (g)</small></span></div>
+            <p class="fine-print">USDA reference values per 100 g, scaled by your entered edible weight. Confirm the named reference recipe; preparation, toppings and dressing change nutrition. Add mixed-plate components separately.</p>
+            <p id="nutrition-source" class="fine-print" aria-live="polite"></p>
+            <button class="button primary" type="submit">Save to my food diary <span>+</span></button>
+          </form>
+        </section>
+      </div>
+{% endblock %}

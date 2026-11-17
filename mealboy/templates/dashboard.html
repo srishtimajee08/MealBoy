@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">A FRESH PERSPECTIVE</div>
+      <h1>Your day, at a glance<span class="green">.</span></h1>
+      <p class="muted">Hello, {{ g.user.name.split()[0] }}. Small steps make a meaningful difference.</p>
+    </div>
+    <div class="date-chip">{{ today.strftime("%a, %d %b %Y") }}</div>
+  </header>
+  <section class="hero-panel">
+    <div>
+      <span class="eyebrow">MAKE EVERY MEAL A LITTLE CLEARER</span>
+      <h2>
+        A little awareness.
+        <br>
+        A healthier relationship with food.
+      </h2>
+      <p>Log what’s on your plate. Understand the bigger picture.</p>
+      <a class="button primary" href="{{ url_for('web.analyze') }}">+ Log a meal <span>↗</span></a>
+    </div>
+    <div class="plate-art" aria-hidden="true">
+      <div class="plate">
+        <span class="leaf leaf-one"></span><span class="leaf leaf-two"></span><span class="leaf leaf-three"></span><span class="tomato tomato-one"></span><span class="tomato tomato-two"></span><span class="grain"></span><span class="grain grain-two"></span>
+      </div>
+      <span class="plate-caption">GOOD FOOD. BETTER INSIGHT.</span>
+    </div>
+  </section>
+  <section class="metrics-grid" aria-label="Today's nutrition totals">
+    <article class="metric-card">
+      <div class="metric-label">Today's calories <span class="metric-icon orange">↯</span></div>
+      <div class="metric-value">{{ totals.calories|round|int }} <small>kcal</small></div>
+      <progress value="{{ progress }}"
+                max="100"
+                aria-label="Daily calorie goal progress"></progress>
+      <p>of {{ g.user.calorie_goal }} kcal saved goal</p>
+    </article>
+    <article class="metric-card">
+      <div class="metric-label">Protein <span class="metric-icon green-bg">◈</span></div>
+      <div class="metric-value">{{ totals.protein }} <small>g</small></div>
+      <p>Recorded in today's meals</p>
+    </article>
+    <article class="metric-card">
+      <div class="metric-label">Carbohydrates <span class="metric-icon blue">≋</span></div>
+      <div class="metric-value">{{ totals.carbs }} <small>g</small></div>
+      <p>{{ totals.fat }} g of fat recorded</p>
+    </article>
+    <article class="metric-card">
+      <div class="metric-label">Logging streak <span class="metric-icon pink">♧</span></div>
+      <div class="metric-value">{{ streak }} <small>{{ 'day' if streak == 1 else 'days' }}</small></div>
+      <p>{{ totals.meal_count }} meals logged today</p>
+    </article>
+  </section>
+  <div class="dashboard-grid">
+    <section class="card">
+      <div class="section-heading">
+        <div>
+          <h2>Your week in balance</h2>
+          <p>Recorded calories over the last 7 days</p>
+        </div>
+        <span class="badge">DAILY INTAKE</span>
+      </div>
+      <div class="chart"
+           role="img"
+           aria-label="Calories by day: {% for day in series %}{{ day.label }} {{ day.calories }} kcal. {% endfor %}">{% set peak = [g.user.calorie_goal, series|map(attribute='calories')|max]|max %}{% for day in series %}<div class="chart-column"><span class="chart-value">{{ day.calories }}</span><div class="bar-track"><progress class="chart-bar"
+          value="{{ day.calories }}"
+          max="{{ peak }}"
+          aria-label="{{ day.date }}: {{ day.calories }} kcal"></progress></div><span class="chart-label">{{ day.label }}</span></div>{% endfor %}</div>
+      <p class="chart-note">A blank day means no meals were recorded, not zero food intake.</p>
+    </section>
+    <section class="assistant-card">
+      <span class="assistant-symbol">✧</span><span class="eyebrow">MEET YOUR PERSONAL ASSISTANT</span>
+      <h2>
+        Your meals.
+        <br>
+        Your questions.
+        <br>
+        Answers with context.
+      </h2>
+      <p>Explore your own meal history and saved goals, with a source for every answer.</p>
+      <a class="button secondary" href="{{ url_for('web.chat_page') }}">Let's talk <span>↗</span></a>
+    </section>
+  </div>
+  <section class="card recent-card">
+    <div class="section-heading">
+      <div>
+        <h2>Recently on your plate</h2>
+        <p>Your latest saved meals</p>
+      </div>
+      <a class="text-link" href="{{ url_for('web.diary') }}">View food diary ↗</a>
+    </div>
+    {% if recent %}<div class="meal-list">{% for meal in recent %}<a class="meal-row"
+   href="{{ url_for('web.diary', start=meal.eaten_on, end=meal.eaten_on) }}#meal-{{ meal.id }}"><span class="food-symbol">◒</span><div class="meal-name"><strong>{{ meal.food_name }}</strong><small>{{ meal.meal_type }} · {{ meal.grams|round|int }} g · {{ meal.eaten_on }}</small></div><strong>{{ meal.calories|round|int }} <small>kcal</small></strong><span class="row-arrow">↗</span></a>{% endfor %}</div>{% else %}<div class="empty-state"><span>◒</span><h3>A fresh start looks good on you.</h3><p>Your meals will appear here once you log your first one.</p><a class="text-link" href="{{ url_for('web.analyze') }}">Add your first meal →</a></div>{% endif %}
+  </section>
+  <footer class="page-footer">
+    A little more mindful, one meal at a time.<span>MEALBOY / YOUR PERSONAL FOOD JOURNAL</span>
+  </footer>
+{% endblock %}

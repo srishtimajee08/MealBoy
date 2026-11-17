@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Your assistant{% endblock %}
+{% block content %}
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">ANSWERS THAT START WITH YOU</span>
+      <h1>A conversation with context<span class="green">.</span></h1>
+      <p class="muted">Ask about your meals, recorded nutrition, and saved goals.</p>
+    </div>
+    <span class="badge">{{ 'LOCAL AI' if provider == 'ollama' else 'EVIDENCE MODE' }}</span>
+  </header>
+  <div class="chat-layout">
+    <section class="card chat-card">
+      <div class="chat-top">
+        <div><span class="chat-avatar">✧</span><strong>MealBoy assistant</strong><span class="online-dot"></span></div>
+        <form action="{{ url_for('web.clear_chat') }}" method="post">
+          <input type="hidden"
+                 name="csrf_token"
+                 value="{{ session.csrf_token }}"><button class="text-link">Clear history</button>
+        </form>
+      </div>
+      <div id="chat-messages"
+           class="chat-messages"
+           role="log"
+           aria-live="polite">
+        {% if not history %}<div class="chat-welcome"><span class="assistant-symbol">✧</span><h2>Let's connect the dots.</h2><p>Your own data has a story to tell.<br>Ask a question and explore it together.</p><div class="suggestions"><button type="button" data-question="How much protein did I log today?">How much protein did I log today? ↗</button><button type="button" data-question="Summarize my meals this week">Summarize my meals this week ↗</button><button type="button" data-question="What is my saved calorie goal?">What is my saved calorie goal? ↗</button></div></div>{% endif %}
+        {% for turn in history %}<article class="chat-message user-message"><small>YOU</small><p>{{ turn.question }}</p></article><article class="chat-message assistant-message"><small>MEALBOY · {{ turn.mode|upper }}</small><p>{{ turn.answer }}</p><div class="source-list">{% for source in turn.sources %}<a href="{{ source.url }}">[{{ loop.index }}] {{ source.title }}</a>{% endfor %}</div></article>{% endfor %}
+      </div>
+      <form id="chat-form" class="chat-composer">
+        <label class="sr-only" for="chat-input">Your question</label>
+        <input id="chat-input"
+               name="question"
+               placeholder="Ask something about your food diary…"
+               required
+               minlength="3"
+               maxlength="1000"
+               autocomplete="off"><button class="button primary" type="submit" aria-label="Send question">↑</button>
+      </form>
+      <div id="chat-status" class="chat-status" role="status"></div>
+    </section>
+    <aside class="chat-guide">
+      <div class="card">
+        <span class="eyebrow">PERSONAL BY DESIGN</span>
+        <h3>A little about your assistant</h3>
+        <ul class="guide-list">
+          <li>
+            <strong>Grounded in your records</strong>
+            <p>Answers include links to the meals or profile information used.</p>
+          </li>
+          <li>
+            <strong>Only your workspace</strong>
+            <p>Other accounts' meals never enter your retrieval context.</p>
+          </li>
+          <li>
+            <strong>Clear about the gaps</strong>
+            <p>No matching evidence? It will say so. It cannot see unlogged meals.</p>
+          </li>
+        </ul>
+      </div>
+      <div class="notice">
+        <strong>Try a specific time frame</strong>
+        <p>Today, yesterday, this week, last week, last 7 days, this month, or dates like 2026-09-01 to 2026-09-07.</p>
+        <p>Ask each question with its food or date context; earlier messages are not used as evidence.</p>
+      </div>
+      <p class="fine-print">{{ 'Ollama generates answers locally. Review the cited evidence.' if provider == 'ollama' else 'Evidence mode retrieves and quotes records without a language model. Enable Ollama for generated answers.' }} This assistant does not provide medical advice.</p>
+    </aside>
+  </div>
+{% endblock %}

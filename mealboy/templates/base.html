@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ session.csrf_token }}">
+    <meta name="description"
+          content="MealBoy — understand your food, track your meals, and ask your own nutrition data.">
+    <title>{% block title %}Overview{% endblock %} · MealBoy</title>
+    <link rel="icon"
+          href="{{ url_for('static', filename='logo.svg') }}"
+          type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    {% if g.user %}
+      <aside class="sidebar">
+        <a class="brand" href="{{ url_for('web.dashboard') }}">
+        <img src="{{ url_for('static', filename='logo.svg') }}"
+             alt=""
+             width="36"
+             height="36">MealBoy<span class="brand-dot">.</span></a>
+        <div class="workspace-label">YOUR NUTRITION SPACE</div>
+        <nav aria-label="Main navigation">
+          {% for key, endpoint, icon, label in [('dashboard','web.dashboard','◫','Overview'),('analyze','web.analyze','⌁','Analyze food'),('diary','web.diary','▤','Food diary'),('chat','web.chat_page','✧','Your assistant'),('settings','web.settings','⚙','Settings')] %}
+            <a class="nav-item {% if active == key %}active{% endif %}"
+               href="{{ url_for(endpoint) }}"
+               {% if active == key %}aria-current="page"{% endif %}><span aria-hidden="true">{{ icon }}</span>{{ label }}{% if key == "chat" %}<small>RAG</small>{% endif %}</a>
+          {% endfor %}
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="privacy-card">
+            <span class="privacy-icon">⌂</span><strong>Your food. Your space.</strong>
+            <p>Your assistant searches only your saved records.</p>
+          </div>
+          <button class="theme-toggle" type="button" aria-label="Toggle dark mode">◐ <span>Switch theme</span></button>
+          <div class="user-card">
+            <span class="avatar">{{ g.user.name[0]|upper }}</span>
+            <div><strong>{{ g.user.name }}</strong><small>Personal workspace</small></div>
+            <form method="post" action="{{ url_for('auth.logout') }}">
+              <input type="hidden"
+                     name="csrf_token"
+                     value="{{ session.csrf_token }}"><button class="icon-button"
+        aria-label="Sign out"
+        title="Sign out">↪</button>
+            </form>
+          </div>
+        </div>
+      </aside>
+    {% endif %}
+    <main id="main"
+          class="{% if g.user %}main-content{% else %}public-content{% endif %}">
+      {% for category, message in get_flashed_messages(with_categories=true) %}<div class="alert {{ category }}"
+     role="status">{{ message }}</div>{% endfor %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

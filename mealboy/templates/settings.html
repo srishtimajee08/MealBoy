@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">MAKE YOURSELF AT HOME</span>
+      <h1>Your preferences<span class="green">.</span></h1>
+      <p class="muted">A few details to make MealBoy feel more like you.</p>
+    </div>
+  </header>
+  <div class="two-column">
+    <section class="card">
+      <h2>Your profile</h2>
+      <form method="post" class="stack">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        <label>
+          Name
+          <input name="name"
+                 value="{{ g.user.name }}"
+                 minlength="2"
+                 maxlength="80"
+                 required>
+        </label>
+        <label>
+          Email
+          <input value="{{ g.user.email }}" type="email" disabled>
+        </label>
+        <label>
+          Daily calorie goal (kcal)
+          <input name="calorie_goal"
+                 type="number"
+                 min="500"
+                 max="10000"
+                 value="{{ g.user.calorie_goal }}"
+                 required>
+        </label>
+        <p class="fine-print">A self-selected tracking target, not a personalized dietary prescription. The initial 2,000 kcal value is a placeholder.</p>
+        <label>
+          Time zone
+          <input name="timezone"
+                 value="{{ g.user.timezone }}"
+                 list="timezones"
+                 required>
+          <datalist id="timezones">
+            <option value="Asia/Kolkata"></option>
+            <option value="UTC"></option>
+            <option value="Europe/London"></option>
+            <option value="America/New_York"></option>
+          </datalist>
+        </label>
+        <label>
+          Food preferences & personal context
+          <textarea name="preferences"
+                    maxlength="1000"
+                    rows="4"
+                    placeholder="For example: I prefer vegetarian meals and usually cook at home.">{{ g.user.preferences }}</textarea>
+        </label>
+        <p class="fine-print">Your assistant can retrieve these notes. It cannot verify allergens or food safety.</p>
+        <button class="button primary">Save preferences <span>↗</span></button>
+      </form>
+    </section>
+    <div class="stack">
+      <section class="card">
+        <h2>Body &amp; energy estimates</h2>
+        <p class="fine-print">Optional adult estimates for ages 20–100. BMI is a screening measure, not a diagnosis. Resting energy and maintenance calories are estimates, not a dietary prescription. Not intended for pregnancy or breastfeeding.</p>
+        <form method="post" action="{{ url_for('web.save_measurements') }}" class="stack">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+          <label>Age (years)<input name="age" type="number" min="20" max="100" value="{{ metrics.age if metrics else '' }}" required></label>
+          <label>Height (cm)<input name="height_cm" type="number" min="100" max="250" step="0.1" value="{{ metrics.height_cm if metrics else '' }}" required></label>
+          <label>Weight (kg)<input name="weight_kg" type="number" min="30" max="350" step="0.1" value="{{ metrics.weight_kg if metrics else '' }}" required></label>
+          <label>Mifflin–St Jeor formula coefficient
+            <select name="formula_sex" required>
+              <option value="">Choose coefficient</option>
+              {% for value in ['female', 'male'] %}<option value="{{ value }}" {{ 'selected' if metrics and metrics.formula_sex == value else '' }}>{{ value|capitalize }}</option>{% endfor %}
+            </select>
+          </label>
+          <label>Activity assumption
+            <select name="activity" required>
+              {% for key, item in activities.items() %}<option value="{{ key }}" {{ 'selected' if metrics and metrics.activity == key else '' }}>{{ item[1] }} (×{{ item[0] }})</option>{% endfor %}
+            </select>
+          </label>
+          <button class="button primary">Calculate &amp; save</button>
+        </form>
+        {% if metrics %}
+          <p><strong>BMI:</strong> {{ metrics.bmi }} · {{ metrics.bmi_category }}<br><strong>Resting energy (BMR estimate):</strong> {{ metrics.bmr }} kcal/day<br><strong>Maintenance estimate (TDEE):</strong> {{ metrics.tdee }} kcal/day</p>
+          <p class="fine-print">Activity multipliers are rough assumptions. Your calorie goal remains editable in Your profile.</p>
+          <form method="post" action="{{ url_for('web.save_measurements') }}">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+            <button class="button secondary" name="action" value="clear">Remove measurements</button>
+          </form>
+        {% endif %}
+        <p class="fine-print">Sources: <a href="https://www.cdc.gov/bmi/adult-calculator/bmi-categories.html">CDC adult BMI</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/2305711/">Mifflin–St Jeor equation</a>.</p>
+      </section>
+      <section class="card">
+        <span class="eyebrow">WORKSPACE STATUS</span>
+        <h2>Everything in its place.</h2>
+        <div class="status-row"><span>Food recognition</span><span class="badge">{{ 'ARTIFACTS FOUND' if model_present else 'SETUP NEEDED' }}</span></div>
+        <p class="muted">{{ 'Model files exist; loading and compatibility are checked on the first prediction.' if model_present else 'Manual logging is available. Train and export MobileNetV2 to enable photo classification.' }}</p>
+        <div class="status-row"><span>Assistant</span><span class="badge">{{ provider|upper }}</span></div>
+        <p class="muted">{{ 'Local generation is configured. If unavailable, answers fall back to evidence excerpts.' if provider == 'ollama' else 'Private search with cited record excerpts. No model download or API key needed.' }}</p>
+      </section>
+      <section class="card">
+        <h3>Your data stays useful.</h3>
+        <p class="muted">Export your diary as CSV, or use Print / PDF to save a report. Removing a meal clears saved chat answers that may reference it.</p>
+        <a class="text-link" href="{{ url_for('web.diary') }}">Go to your food diary ↗</a>
+      </section>
+    </div>
+  </div>
+  <section class="card account-actions">
+    <h3>Appearance and account</h3>
+    <button class="theme-toggle" type="button" aria-label="Change appearance">
+      <span>Switch light / dark theme</span>
+    </button>
+    <form method="post" action="{{ url_for('auth.logout') }}">
+      <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+      <button class="button secondary">Sign out of MealBoy</button>
+    </form>
+  </section>
+{% endblock %}

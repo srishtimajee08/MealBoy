@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Food diary{% endblock %}
+{% block content %}
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">THE LITTLE THINGS ADD UP</span>
+      <h1>Your food diary<span class="green">.</span></h1>
+      <p class="muted">A personal record of what nourishes your day.</p>
+    </div>
+    <a class="button primary" href="{{ url_for('web.analyze') }}">+ Log a meal</a>
+  </header>
+  <section class="card">
+    <div class="diary-toolbar">
+      <form method="get" class="filter-form">
+        <label>
+          From
+<input name="start"
+       type="date"
+       value="{{ start }}"
+       max="{{ today }}"
+       required></label><label>To
+<input name="end" type="date" value="{{ end }}" max="{{ today }}" required></label><button class="button secondary">Apply dates</button>
+      </form>
+      <div class="export-actions">
+        <a class="text-link"
+           href="{{ url_for('web.export_csv', start=start, end=end) }}">Export CSV ↓</a><button class="text-link print-button" type="button">Print / PDF ↗</button>
+      </div>
+    </div>
+    <div class="diary-summary"><span><strong>{{ totals.meal_count }}</strong> meals recorded</span><span><strong>{{ totals.calories|round|int }}</strong> total kcal</span><span><strong>{{ totals.protein }}</strong> g protein</span><span><strong>{{ totals.logged_days }}</strong> days logged</span></div>
+    {% if meals %}<div class="table-wrap"><table><thead><tr><th>Food & details</th><th>Date</th><th>Portion</th><th>Calories</th><th>P / C / F</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>{% for meal in meals %}<tr id="meal-{{ meal.id }}"><td><strong>{{ meal.food_name }}</strong><small>{{ meal.meal_type }} · {{ meal.entry_method|replace('_', ' ') }}</small>{% if meal.note %}<small class="meal-note">{{ meal.note }}</small>{% endif %}<details><summary>Nutrition source</summary><p class="fine-print">{{ meal.nutrition_source }}</p></details></td><td>{{ meal.eaten_on }}</td><td>{{ meal.grams|round(1) }} g</td><td><strong>{{ meal.calories|round|int }}</strong> kcal</td><td>{{ meal.protein }} / {{ meal.carbs }} / {{ meal.fat }} g</td><td><form method="post"
+      action="{{ url_for('web.delete_meal',meal_id=meal.id) }}"
+      class="confirm-delete">
+<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}"><button class="delete-button" aria-label="Delete {{ meal.food_name }}">Remove</button></form></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state"><span>▤</span><h3>No meals in this chapter yet.</h3><p>Try another date range or log something you enjoyed.</p><a class="text-link" href="{{ url_for('web.analyze') }}">Log a meal →</a></div>{% endif %}
+  </section>
+  <p class="fine-print">All values are estimates from saved portion weights and catalogue entries. Missing days represent missing records.</p>
+{% endblock %}
