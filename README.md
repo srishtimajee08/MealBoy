@@ -22,32 +22,6 @@ The project runs locally using Flask and SQLite. Food recognition uses a trained
 8. Optional adult body estimates and an independently editable calorie goal.
 9. Responsive pages with light and dark themes.
 
-## Team
-
-### Ratnadeep Gharui
-
-Roll number: 23052661
-
-Assigned area: Machine learning and data engineering, including dataset preparation, training, evaluation and recognition artifacts.
-
-### Srishti Majee
-
-Roll number: 23052678
-
-Assigned area: Frontend and user experience, including page templates, styling, navigation and meal logging interactions.
-
-### Om Prakash
-
-Roll number: 23052895
-
-Assigned area: Backend and data security, including Flask routes, authentication, database operations and account isolation.
-
-### Hemant Kumar
-
-Roll number: 23052641
-
-Assigned area: Nutrition, assistant integration and quality assurance, including reference calculations, retrieval, testing and delivery documentation.
-
 ## Technology
 
 Python and Flask handle application logic and requests. SQLite stores account information and meal records. Jinja templates, HTML, CSS and vanilla JavaScript provide the interface.
