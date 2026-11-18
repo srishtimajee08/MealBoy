@@ -1,0 +1,17 @@
+.venv/
+.venv-ml/
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+instance/
+artifacts/*
+!artifacts/.gitkeep
+!artifacts/food_model.keras
+!artifacts/labels.json
+!artifacts/confidence.json
+datasets/
+delivery/
+reports/*
+!reports/.gitkeep
