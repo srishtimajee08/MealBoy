@@ -1,0 +1,8 @@
+{
+  "threshold": 0.67,
+  "source": "validation only",
+  "target_precision": 0.9,
+  "minimum_accepted": 100,
+  "qualifying_threshold_found": true,
+  "note": "Scores are uncalibrated; no guarantee on unseen foods."
+}
